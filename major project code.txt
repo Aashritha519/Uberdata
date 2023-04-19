@@ -1,0 +1,97 @@
+import pandas as pd
+from sklearn.linear_model import LogisticRegression,LinearRegression
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import itertools
+import gc
+import os
+import sys
+%matplotlib inline
+def reduce_mem_usage(df):
+""" iterate through all the columns of a dataframe and modify the data type
+to reduce memory usage.
+"""
+start_nem = df.memory_usage().sum() / 1024**2
+for col in df.columns:
+col_type = df[col].dtype
+if col_type != object:
+c_min = df[col].min()
+c_max = df[col].max()
+if str(col_type)[:3] == 'int':
+if c_min > np.iinfo(np.int8).min and c_max < np.iinfo(np.int8).max:
+df[col] = df[col].astype(np.int8)
+elif c_min > np.iinfo(np.int16).min and c_max < np.iinfo(np.int16).max:
+df[col] = df[col].astype(np.int16)
+elif c_min > np.iinfo(np.int32).min and c_max < np.iinfo(np.int32).max:
+df[col] = df[col].astype(np.int32)
+elif c_min > np.iinfo(np.int64).min and c_max < np.iinfo(np.int64).max:
+df[col] = df[col].astype(np.int64)
+else:
+#if.c_min > np.finfo(np.float16).min and c_max < np.finfo(np.float16).max:
+# df[col] = df[col].astype(np.float16)
+#e1
+if c_min > np.finfo(np.float32).min and c_max < np.finfo(np.float32).max:
+df[col] = df[col].astype(np.float32)
+else:
+df[col] = df[col].astype(np.float64)
+#else:
+#df[col] = df[col].astype('category')
+end_men = df.memory_usage().sum() / 1024**2
+print('Memory usage of dataframe is {:.2f} MB --> {:.2f} MB {Decreased by {:.1f%)'.format(
+start_men, end_men, 100 * (start_men - end_men) / start_men))
+return df
+cab_data = pd.read_csv("/content/cab_rides.csv")
+cab_data=reduce_mem_usage(cab_data)
+weather_dat = pd.read_csv("/content/weather.csv")
+weather_data=reduce_mem_usage(weather_data)
+cab_data.head()
+cab.data_columns
+import datetime
+cab_data['datetime']= pd.to_datetime(cab_data['time_stamp'])
+cab_data
+weather_data['date_time'] = pd.to_datetime(weather_data['time_stamp'])
+cab_data.columns
+Index(['distance', 'cab_type', 'time_stamp', 'destination', 'source', 'price', 'surge_multiplier', 'id', 'product_id', 'name', 'datetime'],dtype='object')
+weather_data.columns
+Index(['temp', 'location', 'clouds', 'pressure', 'rain', 'time_stamp', 'humidity', 'wind', 'date_time'],dtype='object')
+cab_data.shape
+weather_data.shape
+cab_data.describe()
+weather_data.describe()
+a=pd.contact([cab data,weather data])
+a['day']=a.date_time.dt.day
+a['hour']=a.date_time.dt.hour
+a.fillna(0,inplace=True)
+a.columns
+Index(['distance', 'cab_type', 'time_stamp', 'destination', 'source', 'price', 'surge_multiplier', 'id', 'product_id', 'name', 'datetime', 'temp', 'date_time', 'day', 'hour'],dtype='object')
+a.groupby('cab_type:).count()
+a.groupby('cab_type').count().plot.bar()
+a['price'].value_counts().plot(kind='bar',figsize=(100,50),color='blue')
+a['hour'].value_counts().plot(kind='bar',figsize=(10,5),color='blue')
+import matplotlib.pyplot as plt
+x=a['hour']
+y=a['price']
+plt.plot(x,y)
+plt.show()
+x=a['rain']
+y=a['price']
+plt.plot(x,y)
+plt.show()
+a.columns
+Index(['distance', 'cab_type', 'time_stamp', 'destination', 'source', 'price', 'surge_multiplier', 'id', 'product_id', 'name', 'datetime', 'temp', 'date_time', 'day', 'hour'],dtype='object')
+x1=a[['distance', 'temp', 'clouds', 'pressure', 'humidity', 'wind', 'rain', 'day', 'hour', 'surge_multiplier', 'clouds']]
+y1=a['price']
+from sklearn.model_selection import train_test_split
+x_train, y_train, x_test, y_test = train_test_split(x1, y1, test_size=0.25,random_state=42)
+linear=LinearRegression()
+linear.fit(x_train,x_test)
+predictions=linear.predict(y_train)
+df=pd.DataFrame({'Actual': y_test, 'predicted': predictions})
+df
+df1=df.head(25)
+df1.plot(kind='bar',figsize=(26,10))
+plt.grid(which='major', linestyle='-', linewidth='0.5', color='green')
+plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+plt.show()
